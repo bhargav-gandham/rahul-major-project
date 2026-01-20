@@ -1,68 +1,52 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GraduationCap, Users, BookOpen, UserCircle, Loader2 } from 'lucide-react';
-import { UserRole } from '@/types';
+import { GraduationCap, Loader2, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 
-const roleInfo = {
-  admin: {
-    icon: Users,
-    title: 'Administrator',
-    description: 'Manage users, subjects, and system settings',
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
-  },
-  faculty: {
-    icon: BookOpen,
-    title: 'Faculty',
-    description: 'Create assignments, evaluate submissions, share resources',
-    color: 'text-accent',
-    bgColor: 'bg-accent/10',
-  },
-  student: {
-    icon: GraduationCap,
-    title: 'Student',
-    description: 'View assignments, submit work, track progress',
-    color: 'text-success',
-    bgColor: 'bg-success/10',
-  },
-  parent: {
-    icon: UserCircle,
-    title: 'Parent',
-    description: 'Monitor academic progress and deadlines',
-    color: 'text-warning',
-    bgColor: 'bg-warning/10',
-  },
-};
-
 export function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState<UserRole>('student');
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const success = await login(email, password, selectedRole);
-      if (success) {
-        toast.success(`Welcome! Logged in as ${roleInfo[selectedRole].title}`);
-        navigate(`/${selectedRole}`);
+      if (isLogin) {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast.error(error.message || 'Failed to sign in');
+        } else {
+          toast.success('Welcome back!');
+          navigate('/dashboard');
+        }
       } else {
-        toast.error('Login failed. Please try again.');
+        if (!fullName.trim()) {
+          toast.error('Please enter your full name');
+          setIsLoading(false);
+          return;
+        }
+        const { error } = await signUp(email, password, fullName);
+        if (error) {
+          toast.error(error.message || 'Failed to sign up');
+        } else {
+          toast.success('Account created successfully!');
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
-      toast.error('An error occurred during login.');
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +111,7 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* Right Panel - Login Form */}
+      {/* Right Panel - Auth Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
@@ -143,89 +127,99 @@ export function LoginPage() {
 
           <Card className="border-0 shadow-xl">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">Welcome Back</CardTitle>
+              <CardTitle className="text-2xl">
+                {isLogin ? 'Welcome Back' : 'Create Account'}
+              </CardTitle>
               <CardDescription>
-                Sign in to access your dashboard
+                {isLogin 
+                  ? 'Sign in to access your dashboard' 
+                  : 'Sign up to get started with SCAM'}
               </CardDescription>
             </CardHeader>
 
             <CardContent>
-              <Tabs value={selectedRole} onValueChange={(v) => setSelectedRole(v as UserRole)}>
-                <TabsList className="grid grid-cols-4 mb-6">
-                  {(Object.keys(roleInfo) as UserRole[]).map((role) => {
-                    const info = roleInfo[role];
-                    const Icon = info.icon;
-                    return (
-                      <TabsTrigger 
-                        key={role} 
-                        value={role}
-                        className="flex flex-col gap-1 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="text-xs capitalize">{role}</span>
-                      </TabsTrigger>
-                    );
-                  })}
+              <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(v) => setIsLogin(v === 'login')}>
+                <TabsList className="grid grid-cols-2 mb-6">
+                  <TabsTrigger value="login">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
                 </TabsList>
 
-                {(Object.keys(roleInfo) as UserRole[]).map((role) => {
-                  const info = roleInfo[role];
-                  const Icon = info.icon;
-                  return (
-                    <TabsContent key={role} value={role}>
-                      <div className={`p-4 rounded-lg ${info.bgColor} mb-6`}>
-                        <div className="flex items-center gap-3">
-                          <Icon className={`h-8 w-8 ${info.color}`} />
-                          <div>
-                            <h3 className="font-semibold">{info.title}</h3>
-                            <p className="text-sm text-muted-foreground">{info.description}</p>
-                          </div>
-                        </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {!isLogin && (
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="fullName"
+                          type="text"
+                          placeholder="John Doe"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="pl-10"
+                          required={!isLogin}
+                        />
                       </div>
-                    </TabsContent>
-                  );
-                })}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" variant="hero" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {isLogin ? 'Signing in...' : 'Creating account...'}
+                      </>
+                    ) : (
+                      isLogin ? 'Sign In' : 'Create Account'
+                    )}
+                  </Button>
+                </form>
               </Tabs>
 
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={`${selectedRole}@university.edu`}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <Button type="submit" variant="hero" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    `Sign in as ${roleInfo[selectedRole].title}`
-                  )}
-                </Button>
-              </form>
-
               <p className="text-center text-sm text-muted-foreground mt-6">
-                Demo Mode: Enter any email/password to explore the {selectedRole} dashboard
+                {isLogin 
+                  ? "Don't have an account? " 
+                  : "Already have an account? "}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  {isLogin ? 'Sign up' : 'Sign in'}
+                </button>
               </p>
             </CardContent>
           </Card>

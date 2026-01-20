@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -63,13 +64,25 @@ const roleNavItems = {
 };
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, logout } = useAuth();
+  const { profile, role, signOut, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  if (!user) return null;
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
-  const navItems = roleNavItems[user.role] || [];
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  const navItems = role ? roleNavItems[role] || [] : [];
+  const displayName = profile?.full_name || 'User';
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase();
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,12 +148,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-sidebar-accent">
                 <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
-                  {user.name.split(' ').map(n => n[0]).join('')}
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-sidebar-foreground/70 capitalize">{user.role}</p>
+                <p className="text-sm font-medium truncate">{displayName}</p>
+                <p className="text-xs text-sidebar-foreground/70 capitalize">{role}</p>
               </div>
             </div>
           </div>
@@ -161,7 +174,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 sticky top-0 lg:top-0 mt-16 lg:mt-0 z-20">
           <div className="flex items-center gap-4">
             <h2 className="text-lg font-semibold hidden sm:block">
-              Welcome back, {user.name.split(' ')[0]}
+              Welcome back, {displayName.split(' ')[0]}
             </h2>
           </div>
 
@@ -176,10 +189,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Button variant="ghost" className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                      {user.name.split(' ').map(n => n[0]).join('')}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:inline">{user.name}</span>
+                  <span className="hidden sm:inline">{displayName}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -190,7 +203,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-destructive">
+                <DropdownMenuItem onClick={signOut} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
