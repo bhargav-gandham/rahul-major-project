@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { PriorityAssignmentCard } from '@/components/dashboard/PriorityAssignmentCard';
 import { RecentSubmissionCard } from '@/components/dashboard/RecentSubmissionCard';
+import { SubmissionForm } from '@/components/submissions/SubmissionForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
@@ -17,8 +19,34 @@ import {
   BookOpen,
   GraduationCap,
   TrendingUp,
+  ArrowRight,
 } from 'lucide-react';
 import { usePrioritizedAssignments, useSubmissions, useAcademicRecords, useSubjects } from '@/hooks/useData';
+import { useQueryClient } from '@tanstack/react-query';
+
+interface PrioritizedAssignment {
+  id: string;
+  title: string;
+  description: string | null;
+  deadline: string;
+  max_marks: number;
+  late_submission_allowed: boolean;
+  late_submission_penalty: number;
+  created_at: string;
+  subject?: {
+    id: string;
+    name: string;
+    code: string;
+    difficulty: number;
+  };
+  priority?: {
+    score: number;
+    level: 'high' | 'medium' | 'low';
+    deadline_proximity: number;
+    subject_difficulty: number;
+    task_volume: number;
+  };
+}
 
 export function StudentDashboard() {
   const { role, isLoading: authLoading } = useAuth();
@@ -26,6 +54,8 @@ export function StudentDashboard() {
   const { data: submissions, isLoading: submissionsLoading } = useSubmissions();
   const { data: academicRecords, isLoading: recordsLoading } = useAcademicRecords();
   const { data: subjects } = useSubjects();
+  const [selectedAssignment, setSelectedAssignment] = useState<PrioritizedAssignment | null>(null);
+  const queryClient = useQueryClient();
 
   // Redirect non-students
   if (!authLoading && role && role !== 'student') {
@@ -49,6 +79,11 @@ export function StudentDashboard() {
     .slice(0, 3) || [];
 
   const isLoading = assignmentsLoading || submissionsLoading || recordsLoading;
+
+  const handleSubmissionSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['submissions'] });
+    queryClient.invalidateQueries({ queryKey: ['prioritized-assignments'] });
+  };
 
   return (
     <DashboardLayout>
@@ -112,9 +147,16 @@ export function StudentDashboard() {
                 <AlertTriangle className="h-5 w-5 text-warning" />
                 Priority Assignments
               </h2>
-              <Badge variant="outline" className="font-normal">
-                AI Prioritized
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="font-normal">
+                  AI Prioritized
+                </Badge>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/student/assignments">
+                    View All <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
 
             {isLoading ? (
@@ -149,8 +191,8 @@ export function StudentDashboard() {
                       subjectDifficulty: assignment.priority?.subject_difficulty || 0,
                       taskVolume: assignment.priority?.task_volume || 0,
                     }}
-                    onSubmit={() => console.log('Submit', assignment.id)}
-                    onView={() => console.log('View', assignment.id)}
+                    onSubmit={() => setSelectedAssignment(assignment)}
+                    onView={() => {}}
                   />
                 ))}
               </div>
@@ -273,6 +315,29 @@ export function StudentDashboard() {
             </Card>
           </div>
         </div>
+
+        {/* Submission Form Dialog */}
+        {selectedAssignment && (
+          <SubmissionForm
+            assignment={{
+              id: selectedAssignment.id,
+              title: selectedAssignment.title,
+              description: selectedAssignment.description,
+              deadline: selectedAssignment.deadline,
+              max_marks: selectedAssignment.max_marks,
+              late_submission_allowed: selectedAssignment.late_submission_allowed,
+              late_submission_penalty: selectedAssignment.late_submission_penalty,
+              subject: {
+                id: selectedAssignment.subject?.id || '',
+                name: selectedAssignment.subject?.name || '',
+                code: selectedAssignment.subject?.code || '',
+              },
+            }}
+            open={!!selectedAssignment}
+            onOpenChange={(open) => !open && setSelectedAssignment(null)}
+            onSuccess={handleSubmissionSuccess}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

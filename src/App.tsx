@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import { Dashboard } from "./pages/Dashboard";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
+import { StudentAssignments } from "./pages/student/StudentAssignments";
 import { FacultyDashboard } from "./pages/faculty/FacultyDashboard";
 import { ParentDashboard } from "./pages/parent/ParentDashboard";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -44,6 +45,22 @@ function AppRoutes() {
       <Route path="/dashboard" element={<Dashboard />} />
       
       {/* Student Routes */}
+      <Route 
+        path="/student" 
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/student/assignments" 
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentAssignments />
+          </ProtectedRoute>
+        } 
+      />
       <Route 
         path="/student/*" 
         element={

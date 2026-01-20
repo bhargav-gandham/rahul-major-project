@@ -97,7 +97,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </Button>
         <div className="flex items-center gap-2 ml-4">
           <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg">SCAM</span>
+          <span className="font-semibold text-lg">EduFlow</span>
         </div>
       </header>
 
@@ -115,7 +115,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <GraduationCap className="h-6 w-6 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-bold text-lg">SCAM</h1>
+              <h1 className="font-bold text-lg">EduFlow</h1>
               <p className="text-xs text-sidebar-foreground/70">Curriculum Manager</p>
             </div>
           </div>
