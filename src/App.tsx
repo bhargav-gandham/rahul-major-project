@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import { Dashboard } from "./pages/Dashboard";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { StudentAssignments } from "./pages/student/StudentAssignments";
+import { StudentSubmissions } from "./pages/student/StudentSubmissions";
 import { FacultyDashboard } from "./pages/faculty/FacultyDashboard";
 import { ParentDashboard } from "./pages/parent/ParentDashboard";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
@@ -58,6 +59,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentAssignments />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/student/submissions" 
+        element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentSubmissions />
           </ProtectedRoute>
         } 
       />
