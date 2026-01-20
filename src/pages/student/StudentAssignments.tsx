@@ -281,7 +281,20 @@ export function StudentAssignments() {
         {/* Submission Form Dialog */}
         {selectedAssignment && (
           <SubmissionForm
-            assignment={selectedAssignment}
+            assignment={{
+              id: selectedAssignment.id,
+              title: selectedAssignment.title,
+              description: selectedAssignment.description,
+              deadline: selectedAssignment.deadline,
+              max_marks: selectedAssignment.max_marks,
+              late_submission_allowed: selectedAssignment.late_submission_allowed,
+              late_submission_penalty: selectedAssignment.late_submission_penalty,
+              subject: {
+                id: selectedAssignment.subject?.id || '',
+                name: selectedAssignment.subject?.name || '',
+                code: selectedAssignment.subject?.code || '',
+              },
+            }}
             open={!!selectedAssignment}
             onOpenChange={(open) => !open && setSelectedAssignment(null)}
             onSuccess={handleSubmissionSuccess}

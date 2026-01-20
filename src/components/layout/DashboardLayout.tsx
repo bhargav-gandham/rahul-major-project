@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -25,8 +25,8 @@ import {
   BarChart3,
   Menu,
   X,
+  ChevronLeft,
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
@@ -66,7 +66,7 @@ const roleNavItems = {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile, role, signOut, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
   if (isLoading) {
     return (
@@ -85,59 +85,56 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-50 flex items-center px-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-        <div className="flex items-center gap-2 ml-4">
-          <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg">EduFlow</span>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-sidebar text-sidebar-foreground z-40 transform transition-transform duration-200 ease-in-out lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed lg:static top-0 left-0 h-full bg-sidebar text-sidebar-foreground z-40 transition-all duration-200 ease-in-out flex-shrink-0",
+          sidebarOpen 
+            ? "w-64 translate-x-0" 
+            : "-translate-x-full lg:translate-x-0 lg:w-16"
         )}
       >
-        <div className="flex flex-col h-full">
+        <div className={cn(
+          "flex flex-col h-full overflow-hidden transition-all duration-200",
+          sidebarOpen ? "w-64" : "w-16"
+        )}>
           {/* Logo */}
-          <div className="h-16 flex items-center gap-3 px-6 border-b border-sidebar-border">
-            <div className="w-10 h-10 rounded-lg bg-sidebar-primary flex items-center justify-center">
+          <div className="h-16 flex items-center gap-3 px-4 border-b border-sidebar-border">
+            <div className="w-10 h-10 rounded-lg bg-sidebar-primary flex items-center justify-center flex-shrink-0">
               <GraduationCap className="h-6 w-6 text-sidebar-primary-foreground" />
             </div>
-            <div>
-              <h1 className="font-bold text-lg">EduFlow</h1>
-              <p className="text-xs text-sidebar-foreground/70">Curriculum Manager</p>
-            </div>
+            {sidebarOpen && (
+              <div className="overflow-hidden">
+                <h1 className="font-bold text-lg">EduFlow</h1>
+                <p className="text-xs text-sidebar-foreground/70">Curriculum Manager</p>
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 py-6 px-2 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = location.pathname === item.path || 
+                (item.path !== '/student' && location.pathname.startsWith(item.path));
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() => {
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    !sidebarOpen && "justify-center px-2"
                   )}
+                  title={!sidebarOpen ? item.label : undefined}
                 >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  {sidebarOpen && <span>{item.label}</span>}
                 </Link>
               );
             })}
@@ -145,16 +142,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* User Profile */}
           <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border-2 border-sidebar-accent">
+            <div className={cn("flex items-center gap-3", !sidebarOpen && "justify-center")}>
+              <Avatar className="h-10 w-10 border-2 border-sidebar-accent flex-shrink-0">
                 <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{displayName}</p>
-                <p className="text-xs text-sidebar-foreground/70 capitalize">{role}</p>
-              </div>
+              {sidebarOpen && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{displayName}</p>
+                  <p className="text-xs text-sidebar-foreground/70 capitalize">{role}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -169,10 +168,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 sticky top-0 lg:top-0 mt-16 lg:mt-0 z-20">
+        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 sticky top-0 z-20">
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="flex-shrink-0"
+            >
+              {sidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
             <h2 className="text-lg font-semibold hidden sm:block">
               Welcome back, {displayName.split(' ')[0]}
             </h2>
@@ -213,7 +220,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="flex-1 p-4 lg:p-6">
           {children}
         </main>
       </div>
