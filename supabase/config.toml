@@ -1,1 +1,4 @@
 project_id = "pkufvhollawccxceoekf"
+
+[functions.calculate-priority]
+verify_jwt = false
