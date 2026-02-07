@@ -1,4 +1,4 @@
 project_id = "pkufvhollawccxceoekf"
 
-[functions.calculate-priority]
+[functions.analyze-performance]
 verify_jwt = false
