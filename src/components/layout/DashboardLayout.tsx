@@ -25,6 +25,7 @@ interface NavItem {
 const teacherNav: NavItem[] = [
   { label: 'Dashboard', href: '/teacher', icon: LayoutDashboard },
   { label: 'Upload Data', href: '/teacher/upload', icon: Upload },
+  { label: 'Manage Students', href: '/teacher/students', icon: Users },
 ];
 
 const studentNav: NavItem[] = [

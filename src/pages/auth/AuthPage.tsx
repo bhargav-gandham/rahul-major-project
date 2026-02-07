@@ -39,11 +39,15 @@ export default function AuthPage() {
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signup">Teacher Sign Up</TabsTrigger>
           </TabsList>
           <TabsContent value="login"><LoginForm /></TabsContent>
-          <TabsContent value="signup"><SignupForm /></TabsContent>
+          <TabsContent value="signup"><TeacherSignupForm /></TabsContent>
         </Tabs>
+
+        <p className="text-xs text-center text-muted-foreground">
+          Students: Use the credentials provided by your teacher to sign in.
+        </p>
       </div>
     </div>
   );
@@ -67,7 +71,7 @@ function LoginForm() {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Welcome back</CardTitle>
-        <CardDescription>Sign in to your account</CardDescription>
+        <CardDescription>Sign in as Teacher or Student</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,18 +92,17 @@ function LoginForm() {
   );
 }
 
-function SignupForm() {
+function TeacherSignupForm() {
   const { signUp } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'student' | 'faculty'>('student');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, selectedRole);
+    const { error } = await signUp(email, password, fullName, 'faculty');
     if (error) {
       toast.error(error.message);
     } else {
@@ -111,32 +114,11 @@ function SignupForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Create account</CardTitle>
-        <CardDescription>Choose your role and get started</CardDescription>
+        <CardTitle className="text-lg">Teacher Registration</CardTitle>
+        <CardDescription>Create a teacher account to manage students</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Role</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant={selectedRole === 'student' ? 'default' : 'outline'}
-                onClick={() => setSelectedRole('student')}
-                className="w-full"
-              >
-                Student
-              </Button>
-              <Button
-                type="button"
-                variant={selectedRole === 'faculty' ? 'default' : 'outline'}
-                onClick={() => setSelectedRole('faculty')}
-                className="w-full"
-              >
-                Teacher
-              </Button>
-            </div>
-          </div>
           <div className="space-y-2">
             <Label htmlFor="signup-name">Full Name</Label>
             <Input id="signup-name" value={fullName} onChange={e => setFullName(e.target.value)} required />
@@ -150,7 +132,7 @@ function SignupForm() {
             <Input id="signup-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Account'}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Teacher Account'}
           </Button>
         </form>
       </CardContent>
