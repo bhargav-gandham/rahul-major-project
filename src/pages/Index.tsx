@@ -1,24 +1,12 @@
-import { LoginPage } from './LoginPage';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-
 const Index = () => {
-  const { isAuthenticated, isLoading, role } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold tracking-tight">Welcome</h1>
+        <p className="text-muted-foreground text-lg">Your new project is ready to build.</p>
       </div>
-    );
-  }
-
-  if (isAuthenticated && role) {
-    return <Navigate to={`/${role}`} replace />;
-  }
-
-  return <LoginPage />;
+    </div>
+  );
 };
 
 export default Index;
