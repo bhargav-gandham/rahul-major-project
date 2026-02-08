@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   MessageCircle,
+  TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -26,6 +27,7 @@ interface NavItem {
 const teacherNav: NavItem[] = [
   { label: 'Dashboard', href: '/teacher', icon: LayoutDashboard },
   { label: 'Upload Data', href: '/teacher/upload', icon: Upload },
+  { label: 'Analytics', href: '/teacher/analytics', icon: TrendingUp },
   { label: 'Manage Students', href: '/teacher/students', icon: Users },
 ];
 
