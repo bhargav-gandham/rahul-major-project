@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Upload, FileSpreadsheet, Brain, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Upload, FileSpreadsheet, Brain, CheckCircle2, AlertCircle, Download } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
@@ -180,6 +180,24 @@ export function UploadData() {
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  const downloadSampleCsv = () => {
+    const header = ['student_email', 'subject', 'student_name', 'marks', 'max_marks', 'attendance_percentage', 'mid_exam_score', 'mid_exam_total', 'semester_score', 'semester_total', 'assignment_score', 'assignment_total', 'lab_score', 'lab_total', 'internal_marks', 'internal_total', 'assessment_type', 'term', 'notes'].join(',');
+    const rows = [
+      'student1@example.com,Mathematics,John Doe,78,100,85,35,50,65,100,18,20,40,50,22,25,exam,Term 1,Needs improvement in calculus',
+      'student1@example.com,Physics,John Doe,82,100,90,40,50,70,100,17,20,45,50,23,25,exam,Term 1,Good lab performance',
+      'student2@example.com,Mathematics,Jane Smith,91,100,95,45,50,88,100,19,20,48,50,24,25,exam,Term 1,Excellent overall',
+      'student2@example.com,Chemistry,Jane Smith,74,100,78,30,50,60,100,15,20,35,50,20,25,exam,Term 1,Needs more practice',
+    ];
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sample_student_data.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Display columns that actually have data
   const displayCols = headers.filter(h =>
     preview.some(r => r[h] && r[h].trim() !== '')
@@ -197,11 +215,15 @@ export function UploadData() {
 
         {/* CSV Format Guide */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm flex items-center gap-2">
               <FileSpreadsheet className="h-4 w-4" />
               CSV Format Guide
             </CardTitle>
+            <Button variant="outline" size="sm" onClick={downloadSampleCsv}>
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Download Sample CSV
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
