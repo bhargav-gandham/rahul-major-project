@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  MessageCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -30,6 +31,7 @@ const teacherNav: NavItem[] = [
 
 const studentNav: NavItem[] = [
   { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
+  { label: 'AI Tutor', href: '/student/tutor', icon: MessageCircle },
   { label: 'Goals', href: '/student/goals', icon: Target },
   { label: 'Weekly Plan', href: '/student/plan', icon: CalendarDays },
 ];
