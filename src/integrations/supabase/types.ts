@@ -214,6 +214,7 @@ export type Database = {
       }
       weekly_plans: {
         Row: {
+          completed_days: Json | null
           created_at: string
           focus_areas: Json | null
           id: string
@@ -223,6 +224,7 @@ export type Database = {
           week_start: string
         }
         Insert: {
+          completed_days?: Json | null
           created_at?: string
           focus_areas?: Json | null
           id?: string
@@ -232,6 +234,7 @@ export type Database = {
           week_start: string
         }
         Update: {
+          completed_days?: Json | null
           created_at?: string
           focus_areas?: Json | null
           id?: string
