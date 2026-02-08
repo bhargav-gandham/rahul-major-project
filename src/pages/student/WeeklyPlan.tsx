@@ -58,11 +58,16 @@ export function WeeklyPlan() {
       const today = new Date();
       const weekStart = new Date(today.setDate(today.getDate() - today.getDay() + 1));
 
+      // Store dailySchedule in focus_areas as JSON alongside actual focus areas
+      const planContent = data.planContent || data.plan || 'No plan generated';
+      const dailySchedule = data.dailySchedule || null;
+      const focusAreas = data.focusAreas || [];
+
       const { error: insertErr } = await supabase.from('weekly_plans').insert({
         student_id: user!.id,
         week_start: weekStart.toISOString().split('T')[0],
-        plan_content: data.planContent || data.plan || 'No plan generated',
-        focus_areas: data.focusAreas || [],
+        plan_content: JSON.stringify({ text: planContent, dailySchedule }),
+        focus_areas: focusAreas,
         status: 'active',
       });
 
@@ -76,8 +81,32 @@ export function WeeklyPlan() {
     }
   };
 
+  const parsePlanContent = (content: string) => {
+    try {
+      const parsed = JSON.parse(content);
+      return { text: parsed.text || content, dailySchedule: parsed.dailySchedule || null };
+    } catch {
+      return { text: content, dailySchedule: null };
+    }
+  };
+
+  const dayLabels: Record<string, string> = {
+    monday: 'Monday',
+    tuesday: 'Tuesday',
+    wednesday: 'Wednesday',
+    thursday: 'Thursday',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday',
+  };
+
+  const dayIcons: Record<string, string> = {
+    monday: '📘', tuesday: '📗', wednesday: '📙', thursday: '📕', friday: '📓', saturday: '📔', sunday: '🌟',
+  };
+
   const currentPlan = plans?.[0];
   const pastPlans = plans?.slice(1) || [];
+  const currentParsed = currentPlan ? parsePlanContent(currentPlan.plan_content) : null;
 
   return (
     <DashboardLayout>
@@ -106,9 +135,32 @@ export function WeeklyPlan() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="prose prose-sm max-w-none">
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">{currentPlan.plan_content}</p>
-              </div>
+              {/* Day-wise schedule */}
+              {currentParsed?.dailySchedule ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {Object.entries(currentParsed.dailySchedule).map(([day, plan]) => (
+                    <div key={day} className="p-4 border rounded-lg space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span>{dayIcons[day] || '📌'}</span>
+                        <h4 className="font-semibold text-sm">{dayLabels[day] || day}</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{plan as string}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{currentParsed?.text}</p>
+                </div>
+              )}
+
+              {/* Overall summary */}
+              {currentParsed?.dailySchedule && currentParsed.text && (
+                <div className="pt-3 border-t">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Overview</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{currentParsed.text}</p>
+                </div>
+              )}
 
               {currentPlan.focus_areas && Array.isArray(currentPlan.focus_areas) && (currentPlan.focus_areas as string[]).length > 0 && (
                 <div>
@@ -145,7 +197,7 @@ export function WeeklyPlan() {
                   <p className="text-xs text-muted-foreground mb-2">
                     Week of {new Date(plan.week_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
-                  <p className="text-sm line-clamp-3">{plan.plan_content}</p>
+                  <p className="text-sm line-clamp-3">{parsePlanContent(plan.plan_content).text}</p>
                 </CardContent>
               </Card>
             ))}
