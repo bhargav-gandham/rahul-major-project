@@ -81,12 +81,21 @@ export function WeeklyPlan() {
     }
   };
 
-  const parsePlanContent = (content: string) => {
+  const parsePlanContent = (content: string): { text: string[]; dailySchedule: Record<string, string> | null } => {
     try {
       const parsed = JSON.parse(content);
-      return { text: parsed.text || content, dailySchedule: parsed.dailySchedule || null };
+      // Handle {text, dailySchedule} object format
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        const text = Array.isArray(parsed.text) ? parsed.text : (parsed.text ? [parsed.text] : []);
+        return { text, dailySchedule: parsed.dailySchedule || null };
+      }
+      // Handle plain array format (old data)
+      if (Array.isArray(parsed)) {
+        return { text: parsed, dailySchedule: null };
+      }
+      return { text: [String(parsed)], dailySchedule: null };
     } catch {
-      return { text: content, dailySchedule: null };
+      return { text: [content], dailySchedule: null };
     }
   };
 
@@ -149,16 +158,28 @@ export function WeeklyPlan() {
                   ))}
                 </div>
               ) : (
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{currentParsed?.text}</p>
+                <div className="space-y-2">
+                  {currentParsed?.text.map((item, i) => (
+                    <div key={i} className="flex gap-2 text-sm">
+                      <span className="text-muted-foreground mt-0.5">•</span>
+                      <p className="leading-relaxed">{item}</p>
+                    </div>
+                  ))}
                 </div>
               )}
 
-              {/* Overall summary */}
-              {currentParsed?.dailySchedule && currentParsed.text && (
+              {/* Overall summary bullets */}
+              {currentParsed?.dailySchedule && currentParsed.text.length > 0 && (
                 <div className="pt-3 border-t">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Overview</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{currentParsed.text}</p>
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Key Action Items</h4>
+                  <div className="space-y-1.5">
+                    {currentParsed.text.map((item, i) => (
+                      <div key={i} className="flex gap-2 text-sm text-muted-foreground">
+                        <span className="mt-0.5">•</span>
+                        <p className="leading-relaxed">{item}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
