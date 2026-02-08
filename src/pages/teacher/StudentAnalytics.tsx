@@ -102,24 +102,35 @@ export function StudentAnalytics() {
     }
   };
 
-  // Chart data
+  // Build rich chart data from all available metrics
+  const subjectData = performanceData?.reduce((acc, p) => {
+    if (!acc[p.subject]) acc[p.subject] = { scores: [], attendance: [], midExam: [], semester: [], assignment: [], lab: [] };
+    if (p.marks != null) acc[p.subject].scores.push((Number(p.marks) / Number(p.max_marks)) * 100);
+    if (p.attendance_percentage != null) acc[p.subject].attendance.push(Number(p.attendance_percentage));
+    if ((p as any).mid_exam_score != null) acc[p.subject].midExam.push((Number((p as any).mid_exam_score) / Number((p as any).mid_exam_total || 100)) * 100);
+    if ((p as any).semester_score != null) acc[p.subject].semester.push((Number((p as any).semester_score) / Number((p as any).semester_total || 100)) * 100);
+    if ((p as any).assignment_score != null) acc[p.subject].assignment.push((Number((p as any).assignment_score) / Number((p as any).assignment_total || 100)) * 100);
+    if ((p as any).lab_score != null) acc[p.subject].lab.push((Number((p as any).lab_score) / Number((p as any).lab_total || 100)) * 100);
+    return acc;
+  }, {} as Record<string, { scores: number[]; attendance: number[]; midExam: number[]; semester: number[]; assignment: number[]; lab: number[] }>) || {};
+
+  const avg = (arr: number[]) => arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+
+  const subjectChartData = Object.entries(subjectData).map(([subject, d]) => ({
+    subject,
+    overall: avg(d.scores),
+    attendance: avg(d.attendance),
+    midExam: avg(d.midExam),
+    semester: avg(d.semester),
+    assignment: avg(d.assignment),
+    lab: avg(d.lab),
+  }));
+
   const chartData = performanceData?.map(p => ({
     label: `${p.subject} (${p.assessment_type})`,
-    score: Math.round((Number(p.marks) / Number(p.max_marks)) * 100),
+    score: p.marks != null ? Math.round((Number(p.marks) / Number(p.max_marks)) * 100) : null,
     attendance: Number(p.attendance_percentage),
   })) || [];
-
-  const subjectAvg = performanceData?.reduce((acc, p) => {
-    if (!acc[p.subject]) acc[p.subject] = { total: 0, count: 0 };
-    acc[p.subject].total += (Number(p.marks) / Number(p.max_marks)) * 100;
-    acc[p.subject].count++;
-    return acc;
-  }, {} as Record<string, { total: number; count: number }>) || {};
-
-  const subjectChartData = Object.entries(subjectAvg).map(([subject, { total, count }]) => ({
-    subject,
-    average: Math.round(total / count),
-  }));
 
   return (
     <DashboardLayout>
@@ -139,15 +150,18 @@ export function StudentAnalytics() {
         {!isLoading && chartData.length > 0 && (
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
-              <CardHeader><CardTitle className="text-sm">Subject Averages</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-sm">Subject-wise Breakdown</CardTitle></CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={subjectChartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="subject" tick={{ fontSize: 11 }} />
+                    <XAxis dataKey="subject" tick={{ fontSize: 10 }} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                     <Tooltip />
-                    <Bar dataKey="average" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="midExam" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} name="Mid Exam %" />
+                    <Bar dataKey="semester" fill="hsl(var(--muted-foreground))" radius={[2, 2, 0, 0]} name="Semester %" />
+                    <Bar dataKey="assignment" fill="hsl(var(--ring))" radius={[2, 2, 0, 0]} name="Assignment %" opacity={0.6} />
+                    <Bar dataKey="attendance" fill="hsl(var(--border))" radius={[2, 2, 0, 0]} name="Attendance %" opacity={0.4} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
