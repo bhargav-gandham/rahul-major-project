@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.explainable-predictions]
 verify_jwt = false
+
+[functions.dropout-prediction]
+verify_jwt = false
