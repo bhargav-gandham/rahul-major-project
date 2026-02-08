@@ -88,6 +88,16 @@ export function ExplainableAI() {
     enabled: !!user?.id,
   });
 
+  const { data: profiles } = useQuery({
+    queryKey: ['all-profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('user_id, full_name');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const runPredictions = async () => {
     if (!allPerformance || allPerformance.length === 0) {
       toast.error('No performance data available');
@@ -95,8 +105,14 @@ export function ExplainableAI() {
     }
     setLoading(true);
     try {
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      const enrichedData = allPerformance.map(p => ({
+        ...p,
+        student_name: p.student_name || profileMap.get(p.student_id) || 'Unknown Student',
+      }));
+
       const { data, error } = await supabase.functions.invoke('explainable-predictions', {
-        body: { performanceData: allPerformance },
+        body: { performanceData: enrichedData },
       });
       if (error) throw error;
       if (data.error) throw new Error(data.error);
