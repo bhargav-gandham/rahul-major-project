@@ -10,6 +10,7 @@ import { TeacherDashboard } from "./pages/teacher/TeacherDashboard";
 import { UploadData } from "./pages/teacher/UploadData";
 import { StudentAnalytics } from "./pages/teacher/StudentAnalytics";
 import { ManageStudents } from "./pages/teacher/ManageStudents";
+import { ComparativeAnalytics } from "./pages/teacher/ComparativeAnalytics";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { GoalTracker } from "./pages/student/GoalTracker";
 import { WeeklyPlan } from "./pages/student/WeeklyPlan";
@@ -46,6 +47,7 @@ function AppRoutes() {
       <Route path="/teacher" element={<ProtectedRoute allowedRoles={['faculty']}><TeacherDashboard /></ProtectedRoute>} />
       <Route path="/teacher/upload" element={<ProtectedRoute allowedRoles={['faculty']}><UploadData /></ProtectedRoute>} />
       <Route path="/teacher/students" element={<ProtectedRoute allowedRoles={['faculty']}><ManageStudents /></ProtectedRoute>} />
+      <Route path="/teacher/analytics" element={<ProtectedRoute allowedRoles={['faculty']}><ComparativeAnalytics /></ProtectedRoute>} />
       <Route path="/teacher/student/:studentId" element={<ProtectedRoute allowedRoles={['faculty']}><StudentAnalytics /></ProtectedRoute>} />
 
       {/* Student Routes */}
