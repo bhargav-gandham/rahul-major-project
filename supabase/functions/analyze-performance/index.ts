@@ -66,7 +66,7 @@ serve(async (req) => {
       systemPrompt = `You are an academic planner AI. Create a personalized weekly improvement plan based on the student's complete academic data including semester results, mid exams, assignments, labs, and attendance. Use simple, actionable language. Respond in valid JSON with:
 - planContent: A detailed weekly plan (6-8 bullet points) with specific daily actions. Include time estimates. Address weakest areas first — low assignment scores mean more practice, low attendance means commitment plan, low exam scores mean revision strategy.
 - focusAreas: Array of strings listing 3-5 specific subjects or skills to focus on this week
-- dailySchedule: Object with keys "monday" through "friday", each containing a short 1-2 sentence plan for that day`;
+- dailySchedule: Object with keys "day1" through "day7", each containing a short 1-2 sentence plan for that day. Use "day1", "day2", etc. as keys.`;
 
       userPrompt = `Based on this student's complete academic data, create a personalized weekly improvement plan:\n\n${dataContext}\n\nFocus on their weakest areas (low scores in exams, poor attendance, missing assignments) while maintaining strengths. Be specific and actionable.`;
     }
