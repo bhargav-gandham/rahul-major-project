@@ -13,6 +13,7 @@ import { ManageStudents } from "./pages/teacher/ManageStudents";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { GoalTracker } from "./pages/student/GoalTracker";
 import { WeeklyPlan } from "./pages/student/WeeklyPlan";
+import { AiTutor } from "./pages/student/AiTutor";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -51,6 +52,7 @@ function AppRoutes() {
       <Route path="/student" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
       <Route path="/student/goals" element={<ProtectedRoute allowedRoles={['student']}><GoalTracker /></ProtectedRoute>} />
       <Route path="/student/plan" element={<ProtectedRoute allowedRoles={['student']}><WeeklyPlan /></ProtectedRoute>} />
+      <Route path="/student/tutor" element={<ProtectedRoute allowedRoles={['student']}><AiTutor /></ProtectedRoute>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
