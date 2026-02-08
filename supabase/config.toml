@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.dropout-prediction]
 verify_jwt = false
+
+[functions.student-recommendations]
+verify_jwt = false

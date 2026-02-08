@@ -16,6 +16,7 @@ import {
   MessageCircle,
   TrendingUp,
   UserX,
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -37,6 +38,7 @@ const teacherNav: NavItem[] = [
 const studentNav: NavItem[] = [
   { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
   { label: 'AI Tutor', href: '/student/tutor', icon: MessageCircle },
+  { label: 'Recommendations', href: '/student/recommendations', icon: Sparkles },
   { label: 'Goals', href: '/student/goals', icon: Target },
   { label: 'Weekly Plan', href: '/student/plan', icon: CalendarDays },
 ];
