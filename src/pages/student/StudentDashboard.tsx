@@ -151,6 +151,7 @@ export function StudentDashboard() {
                     <PolarGrid stroke="hsl(var(--border))" />
                     <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
                     <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
+                    <Tooltip formatter={(value: number) => [`${value}%`, 'Score']} />
                     <Radar dataKey="score" stroke="hsl(var(--foreground))" fill="hsl(var(--foreground))" fillOpacity={0.15} />
                   </RadarChart>
                 </ResponsiveContainer>
