@@ -80,13 +80,24 @@ export type Database = {
       student_performance: {
         Row: {
           assessment_type: string | null
+          assignment_score: number | null
+          assignment_total: number | null
           attendance_percentage: number | null
           created_at: string
           id: string
-          marks: number
+          internal_marks: number | null
+          internal_total: number | null
+          lab_score: number | null
+          lab_total: number | null
+          marks: number | null
           max_marks: number
+          mid_exam_score: number | null
+          mid_exam_total: number | null
           notes: string | null
+          semester_score: number | null
+          semester_total: number | null
           student_id: string
+          student_name: string | null
           subject: string
           teacher_id: string
           term: string
@@ -94,13 +105,24 @@ export type Database = {
         }
         Insert: {
           assessment_type?: string | null
+          assignment_score?: number | null
+          assignment_total?: number | null
           attendance_percentage?: number | null
           created_at?: string
           id?: string
-          marks: number
+          internal_marks?: number | null
+          internal_total?: number | null
+          lab_score?: number | null
+          lab_total?: number | null
+          marks?: number | null
           max_marks?: number
+          mid_exam_score?: number | null
+          mid_exam_total?: number | null
           notes?: string | null
+          semester_score?: number | null
+          semester_total?: number | null
           student_id: string
+          student_name?: string | null
           subject: string
           teacher_id: string
           term?: string
@@ -108,13 +130,24 @@ export type Database = {
         }
         Update: {
           assessment_type?: string | null
+          assignment_score?: number | null
+          assignment_total?: number | null
           attendance_percentage?: number | null
           created_at?: string
           id?: string
-          marks?: number
+          internal_marks?: number | null
+          internal_total?: number | null
+          lab_score?: number | null
+          lab_total?: number | null
+          marks?: number | null
           max_marks?: number
+          mid_exam_score?: number | null
+          mid_exam_total?: number | null
           notes?: string | null
+          semester_score?: number | null
+          semester_total?: number | null
           student_id?: string
+          student_name?: string | null
           subject?: string
           teacher_id?: string
           term?: string

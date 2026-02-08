@@ -20,39 +20,55 @@ serve(async (req) => {
       });
     }
 
-    // Build context from performance data
-    const dataContext = performanceData.map((p: any) => 
-      `Subject: ${p.subject}, Score: ${p.marks}/${p.max_marks} (${Math.round((p.marks/p.max_marks)*100)}%), Attendance: ${p.attendance_percentage}%, Type: ${p.assessment_type}, Term: ${p.term}`
-    ).join("\n");
+    // Build rich context from performance data including all available metrics
+    const dataContext = performanceData.map((p: any) => {
+      const parts: string[] = [`Subject: ${p.subject}`];
+      
+      if (p.student_name) parts.push(`Student: ${p.student_name}`);
+      if (p.marks != null) parts.push(`Overall Score: ${p.marks}/${p.max_marks} (${Math.round((p.marks/p.max_marks)*100)}%)`);
+      if (p.mid_exam_score != null) parts.push(`Mid Exam: ${p.mid_exam_score}/${p.mid_exam_total}`);
+      if (p.semester_score != null) parts.push(`Semester Exam: ${p.semester_score}/${p.semester_total}`);
+      if (p.assignment_score != null) parts.push(`Assignments: ${p.assignment_score}/${p.assignment_total}`);
+      if (p.lab_score != null) parts.push(`Lab: ${p.lab_score}/${p.lab_total}`);
+      if (p.internal_marks != null) parts.push(`Internals: ${p.internal_marks}/${p.internal_total}`);
+      if (p.attendance_percentage != null) parts.push(`Attendance: ${p.attendance_percentage}%`);
+      if (p.assessment_type) parts.push(`Type: ${p.assessment_type}`);
+      if (p.term) parts.push(`Term: ${p.term}`);
+      if (p.notes) parts.push(`Notes: ${p.notes}`);
+      
+      return parts.join(", ");
+    }).join("\n");
 
     let systemPrompt = "";
     let userPrompt = "";
 
     if (mode === "teacher") {
-      systemPrompt = `You are an educational analytics AI. Analyze student performance data and provide structured insights for teachers. Always respond in valid JSON with these fields:
-- descriptive: What happened to this student's performance (2-3 sentences)
-- diagnostic: Why it happened - identify root causes (2-3 sentences)
-- predictive: What is likely to happen next based on trends (2-3 sentences)
-- prescriptive: Specific actionable recommendations for the teacher (2-3 sentences)
-- keyFactors: Array of {factor: string, impact: "positive"|"negative"|"neutral"} showing what influences performance
-- recommendations: Array of {type: string, action: string, reasoning: string} with specific interventions`;
+      systemPrompt = `You are an educational analytics AI. Analyze student performance data comprehensively — including semester results, mid exams, assignments, lab scores, internals, and attendance. Provide structured insights for teachers. Always respond in valid JSON with these fields:
+- descriptive: What happened to this student's performance across all assessments (3-4 sentences)
+- diagnostic: Why it happened — identify root causes from patterns in attendance, assignments, exams, labs (3-4 sentences)
+- predictive: What is likely to happen next based on trends across all metrics (2-3 sentences)
+- prescriptive: Specific actionable recommendations for the teacher based on weakness areas (3-4 sentences)
+- keyFactors: Array of {factor: string, impact: "positive"|"negative"|"neutral"} showing what influences performance (include attendance, assignment consistency, exam trends, lab performance)
+- recommendations: Array of {type: string, action: string, reasoning: string} with specific interventions like remedial classes, extra practice, mentoring, attendance improvement`;
 
-      userPrompt = `Analyze this student's academic performance data:\n\n${dataContext}\n\nProvide multi-level analytics in JSON format.`;
+      userPrompt = `Analyze this student's complete academic performance data:\n\n${dataContext}\n\nProvide multi-level analytics in JSON format. Consider all available metrics: semester scores, mid exams, assignments, labs, internals, and attendance patterns.`;
     } else if (mode === "student") {
-      systemPrompt = `You are a friendly academic advisor helping a student understand their performance. Use simple, encouraging language - avoid technical jargon. Respond in valid JSON with:
-- summary: A friendly 2-3 sentence overview of how they're doing
-- strengths: What they're doing well (2 sentences)
-- improvements: Areas to work on, framed positively (2 sentences)
+      systemPrompt = `You are a friendly academic advisor helping a student understand their performance across all subjects and assessment types. Use simple, encouraging language — no jargon. Respond in valid JSON with:
+- summary: A friendly 3-4 sentence overview of how they're doing across semester exams, mid exams, assignments, labs, and attendance
+- strengths: What they're doing well — be specific about which subjects and assessment types (2-3 sentences)
+- improvements: Areas to work on, framed positively with specific suggestions (2-3 sentences)
 - prediction: What to expect if they continue this way (1-2 sentences)
-- keyFactors: Array of {factor: string, impact: "helping"|"needs attention"} showing what's influencing their grades`;
+- keyFactors: Array of {factor: string, impact: "helping"|"needs attention"} showing what's influencing their grades (attendance, assignment submission, exam preparation, lab work etc.)
+- actionItems: Array of 3-5 simple, specific things they can do this week to improve`;
 
-      userPrompt = `Here's a student's performance data. Give them easy-to-understand insights:\n\n${dataContext}\n\nRespond in JSON format with simple, encouraging language.`;
+      userPrompt = `Here's a student's complete performance data including exams, assignments, labs, and attendance. Give them easy-to-understand insights:\n\n${dataContext}\n\nRespond in JSON format with simple, encouraging language.`;
     } else if (mode === "weekly-plan") {
-      systemPrompt = `You are an academic planner AI. Create a personalized weekly improvement plan for a student based on their performance data. Use simple, actionable language. Respond in valid JSON with:
-- planContent: A detailed weekly plan (5-7 bullet points) with specific daily/weekly actions the student should take. Include time estimates.
-- focusAreas: Array of strings listing 2-4 subjects or skills to focus on this week`;
+      systemPrompt = `You are an academic planner AI. Create a personalized weekly improvement plan based on the student's complete academic data including semester results, mid exams, assignments, labs, and attendance. Use simple, actionable language. Respond in valid JSON with:
+- planContent: A detailed weekly plan (6-8 bullet points) with specific daily actions. Include time estimates. Address weakest areas first — low assignment scores mean more practice, low attendance means commitment plan, low exam scores mean revision strategy.
+- focusAreas: Array of strings listing 3-5 specific subjects or skills to focus on this week
+- dailySchedule: Object with keys "monday" through "friday", each containing a short 1-2 sentence plan for that day`;
 
-      userPrompt = `Based on this student's performance data, create a personalized weekly improvement plan:\n\n${dataContext}\n\nFocus on their weakest areas while maintaining strengths. Be specific and actionable.`;
+      userPrompt = `Based on this student's complete academic data, create a personalized weekly improvement plan:\n\n${dataContext}\n\nFocus on their weakest areas (low scores in exams, poor attendance, missing assignments) while maintaining strengths. Be specific and actionable.`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -93,11 +109,9 @@ serve(async (req) => {
     // Parse JSON from the response
     let parsed;
     try {
-      // Try to extract JSON from markdown code blocks or raw JSON
       const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, content];
       parsed = JSON.parse(jsonMatch[1]?.trim() || content.trim());
     } catch {
-      // If parsing fails, return raw content
       parsed = { summary: content, planContent: content, plan: content };
     }
 
@@ -106,10 +120,8 @@ serve(async (req) => {
       const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
       const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-      // Get teacher_id from the auth token
       const authHeader = req.headers.get("Authorization");
       if (authHeader) {
-        // Decode JWT to get user ID
         try {
           const token = authHeader.replace("Bearer ", "");
           const payload = JSON.parse(atob(token.split(".")[1]));
