@@ -15,6 +15,7 @@ import {
   X,
   MessageCircle,
   TrendingUp,
+  UserX,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -29,6 +30,7 @@ const teacherNav: NavItem[] = [
   { label: 'Upload Data', href: '/teacher/upload', icon: Upload },
   { label: 'Analytics', href: '/teacher/analytics', icon: TrendingUp },
   { label: 'Explainable AI', href: '/teacher/explainable-ai', icon: BarChart3 },
+  { label: 'Dropout Risk', href: '/teacher/dropout-prediction', icon: UserX },
   { label: 'Manage Students', href: '/teacher/students', icon: Users },
 ];
 

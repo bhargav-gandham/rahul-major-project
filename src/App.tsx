@@ -12,6 +12,7 @@ import { StudentAnalytics } from "./pages/teacher/StudentAnalytics";
 import { ManageStudents } from "./pages/teacher/ManageStudents";
 import { ComparativeAnalytics } from "./pages/teacher/ComparativeAnalytics";
 import { ExplainableAI } from "./pages/teacher/ExplainableAI";
+import { DropoutPrediction } from "./pages/teacher/DropoutPrediction";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { GoalTracker } from "./pages/student/GoalTracker";
 import { WeeklyPlan } from "./pages/student/WeeklyPlan";
@@ -51,6 +52,7 @@ function AppRoutes() {
       <Route path="/teacher/analytics" element={<ProtectedRoute allowedRoles={['faculty']}><ComparativeAnalytics /></ProtectedRoute>} />
       <Route path="/teacher/student/:studentId" element={<ProtectedRoute allowedRoles={['faculty']}><StudentAnalytics /></ProtectedRoute>} />
       <Route path="/teacher/explainable-ai" element={<ProtectedRoute allowedRoles={['faculty']}><ExplainableAI /></ProtectedRoute>} />
+      <Route path="/teacher/dropout-prediction" element={<ProtectedRoute allowedRoles={['faculty']}><DropoutPrediction /></ProtectedRoute>} />
 
       {/* Student Routes */}
       <Route path="/student" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
