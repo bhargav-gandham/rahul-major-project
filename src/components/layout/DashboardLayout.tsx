@@ -28,6 +28,7 @@ const teacherNav: NavItem[] = [
   { label: 'Dashboard', href: '/teacher', icon: LayoutDashboard },
   { label: 'Upload Data', href: '/teacher/upload', icon: Upload },
   { label: 'Analytics', href: '/teacher/analytics', icon: TrendingUp },
+  { label: 'Explainable AI', href: '/teacher/explainable-ai', icon: BarChart3 },
   { label: 'Manage Students', href: '/teacher/students', icon: Users },
 ];
 
