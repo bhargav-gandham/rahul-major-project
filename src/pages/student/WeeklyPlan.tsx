@@ -100,17 +100,15 @@ export function WeeklyPlan() {
   };
 
   const dayLabels: Record<string, string> = {
-    monday: 'Monday',
-    tuesday: 'Tuesday',
-    wednesday: 'Wednesday',
-    thursday: 'Thursday',
-    friday: 'Friday',
-    saturday: 'Saturday',
-    sunday: 'Sunday',
+    day1: 'Day 1', day2: 'Day 2', day3: 'Day 3', day4: 'Day 4',
+    day5: 'Day 5', day6: 'Day 6', day7: 'Day 7',
+    monday: 'Day 1', tuesday: 'Day 2', wednesday: 'Day 3',
+    thursday: 'Day 4', friday: 'Day 5', saturday: 'Day 6', sunday: 'Day 7',
   };
 
   const dayIcons: Record<string, string> = {
-    monday: '📘', tuesday: '📗', wednesday: '📙', thursday: '📕', friday: '📓', saturday: '📔', sunday: '🌟',
+    day1: '1️⃣', day2: '2️⃣', day3: '3️⃣', day4: '4️⃣', day5: '5️⃣', day6: '6️⃣', day7: '7️⃣',
+    monday: '1️⃣', tuesday: '2️⃣', wednesday: '3️⃣', thursday: '4️⃣', friday: '5️⃣', saturday: '6️⃣', sunday: '7️⃣',
   };
 
   const currentPlan = plans?.[0];
