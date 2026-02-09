@@ -18,6 +18,7 @@ import { GoalTracker } from "./pages/student/GoalTracker";
 import { WeeklyPlan } from "./pages/student/WeeklyPlan";
 import { AiTutor } from "./pages/student/AiTutor";
 import { PersonalizedRecommendations } from "./pages/student/PersonalizedRecommendations";
+import ResearchPaper from "./pages/ResearchPaper";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -62,6 +63,7 @@ function AppRoutes() {
       <Route path="/student/tutor" element={<ProtectedRoute allowedRoles={['student']}><AiTutor /></ProtectedRoute>} />
       <Route path="/student/recommendations" element={<ProtectedRoute allowedRoles={['student']}><PersonalizedRecommendations /></ProtectedRoute>} />
 
+      <Route path="/research-paper" element={<ResearchPaper />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
